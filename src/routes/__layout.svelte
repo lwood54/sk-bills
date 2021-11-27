@@ -1,6 +1,7 @@
 <script context="module">
 	/** @type {import('@sveltejs/kit').Load} */
 	export async function load({ page }) {
+		console.log('running?');
 		return {
 			props: {
 				path: page.path
@@ -11,14 +12,23 @@
 
 <script lang="ts">
 	import { NAV } from '$lib/constants/navigation';
+	import { navigating } from '$app/stores';
+	import { currentPath, fromPath } from '../stores/nav';
 
-	export let path = NAV.HOME;
+	navigating.subscribe((val) => {
+		if (val) {
+			fromPath.set(val.from.path);
+			currentPath.set(val.to.path);
+		}
+	});
 </script>
 
 <div class="nav-bar">
-	<a class="nav-text" class:selected={path === NAV.HOME} href={NAV.HOME}>Home</a>
-	<a class="nav-text" class:selected={path === NAV.BILLS} href={NAV.BILLS}>Bills</a>
-	<a class="nav-text" class:selected={path === NAV.NOT_BILLS} href={NAV.NOT_BILLS}>Not Bills</a>
+	<a class="nav-text" class:selected={$currentPath === NAV.HOME} href={NAV.HOME}>Home</a>
+	<a class="nav-text" class:selected={$currentPath === NAV.BILLS} href={NAV.BILLS}>Bills</a>
+	<a class="nav-text" class:selected={$currentPath === NAV.NOT_BILLS} href={NAV.NOT_BILLS}
+		>Not Bills</a
+	>
 </div>
 <slot />
 
@@ -37,17 +47,19 @@
 		display: flex;
 		align-items: center;
 	}
+
 	.nav-text {
 		display: inline-block;
 		font-size: $f-m;
-		color: $blue-50;
+		color: $blue50;
 		padding: $spacing-s $spacing-l;
 		margin: $spacing-s;
+		border-bottom: 1px solid $primary;
 		&:hover {
-			border-bottom: 1px solid black;
+			border-bottom: 1px solid $secondary;
 		}
 	}
 	.selected {
-		border-bottom: 1px solid $teal-400;
+		border-bottom: 1px solid $teal400;
 	}
 </style>
